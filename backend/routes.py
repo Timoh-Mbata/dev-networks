@@ -1,10 +1,9 @@
 import sqlite3
 from flask import Blueprint, request, jsonify
-from stk_buygoods_payment import initiate_stk_push
+from .stk_buygoods_payment import initiate_stk_push
 
 payment_bp = Blueprint('payment', __name__)
 
-# Function to initialize the database
 def init_db():
     with sqlite3.connect("payments.db") as conn:
         cursor = conn.cursor()
@@ -16,8 +15,6 @@ def init_db():
                             transaction_id TEXT,
                             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)''')
         conn.commit()
-
-# Ensure the database is set up
 init_db()
 
 @payment_bp.route('/pay', methods=['POST'])
@@ -32,8 +29,6 @@ def process_payment():
 
     if amount < 50:
         return jsonify({"message": "Payment failed. Please pay the required amount."}), 400
-
-    # Initiate STK Push
     transaction_id = initiate_stk_push(phone_number, amount, mac_address)
 
     if transaction_id:
